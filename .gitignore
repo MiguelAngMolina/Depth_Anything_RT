@@ -1,0 +1,5 @@
+# Ignorar archivos por extensión
+*.zip
+*.log
+*.pyc
+*.pth
