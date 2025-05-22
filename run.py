@@ -18,6 +18,11 @@ model_configs = {
     'vitg': {'encoder': 'vitg', 'features': 384, 'out_channels': [1536, 1536, 1536, 1536]}
 }
 
+#guardar imagenes
+#os.makedirs("RGB", exist_ok=True)
+#os.makedirs("DepthMaps", exist_ok=True)
+
+
 # Cargar el modelo
 print("🔄 Cargando modelo...")
 depth_model = DepthAnythingV2(**model_configs[ENCODER])
@@ -26,8 +31,8 @@ depth_model = depth_model.to(DEVICE).eval()
 print("✅ Modelo cargado.")
 
 # URL de la cámara
-url = "http://10.14.21.99:8080/video"
-cap = cv2.VideoCapture(url)
+url = "http://192.168.1.6:8080//video"
+cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     print("❌ No se pudo abrir la cámara.")
     exit()
@@ -56,11 +61,23 @@ while True:
         print(f"📸 Captura #{capture_count}")
         capture = frame.copy()
 
+        #guardar imagen RGB
+
+        # rgb_filename = os.path.join("RGB", f"rgb_{capture_count:04d}.jpg")
+        # cv2.imwrite(rgb_filename, capture)
+        # print(f"🖼️ Guardada RGB en: {rgb_filename}")
+
         # Inferencia de profundidad
         depth = depth_model.infer_image(capture[:, :, ::-1], INPUT_SIZE)
         depth_norm = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
         depth_colored = (cmap(depth_norm.astype(np.uint8))[:, :, :3] * 255).astype(np.uint8)
         depth_resized = cv2.resize(depth_colored, (width, height))
+
+
+        # Guardar depth map
+        # depth_filename = os.path.join("DepthMaps", f"depth_{capture_count:04d}.png")
+        # cv2.imwrite(depth_filename, depth_resized)
+        # print(f"🗺️ Guardado depth map en: {depth_filename}")
 
         cv2.imshow("Profundidad", depth_resized)
         capture_count += 1
